@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>SGS — Nova Solicitação</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:        #0f1117;
+            --surface:   #181c27;
+            --border:    #252a38;
+            --accent:    #4f8ef7;
+            --accent-dim:#1e3560;
+            --text:      #e2e8f0;
+            --muted:     #64748b;
+            --success:   #22c55e;
+            --danger:    #ef4444;
+            --radius:    8px;
+            --mono:      'DM Mono', monospace;
+            --sans:      'DM Sans', sans-serif;
+        }
+
+        body {
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo { font-family: var(--mono); font-size: .85rem; letter-spacing: .08em; color: var(--accent); }
+        .logo span { color: var(--muted); }
+        .btn-back {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            padding: .4rem .9rem;
+            border-radius: var(--radius);
+            font-family: var(--sans);
+            font-size: .82rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all .15s;
+        }
+        .btn-back:hover { color: var(--text); border-color: var(--muted); }
+
+        main {
+            max-width: 640px;
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+        }
+
+        h1 { font-size: 1.35rem; font-weight: 600; margin-bottom: .3rem; }
+        .subtitle { color: var(--muted); font-size: .85rem; margin-bottom: 2.5rem; }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+        }
+
+        .field { margin-bottom: 1.4rem; }
+        .field label {
+            display: block;
+            font-size: .72rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            color: var(--muted);
+            margin-bottom: .4rem;
+        }
+        .field select,
+        .field input,
+        .field textarea {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-family: var(--sans);
+            font-size: .9rem;
+            padding: .6rem .85rem;
+            outline: none;
+            transition: border-color .15s;
+            resize: vertical;
+        }
+        .field select:focus,
+        .field input:focus,
+        .field textarea:focus { border-color: var(--accent); }
+        .field textarea { min-height: 100px; }
+
+        .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+        .hint { font-size: .75rem; color: var(--muted); margin-top: .3rem; }
+
+        .btn-submit {
+            width: 100%;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: .75rem;
+            border-radius: var(--radius);
+            font-family: var(--sans);
+            font-size: .9rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: .5rem;
+            transition: opacity .15s;
+        }
+        .btn-submit:hover { opacity: .88; }
+        .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+
+        .msg {
+            padding: .75rem 1rem;
+            border-radius: var(--radius);
+            font-size: .85rem;
+            margin-bottom: 1.2rem;
+            display: none;
+        }
+        .msg.ok  { background: rgba(34,197,94,.1);  border: 1px solid rgba(34,197,94,.3);  color: var(--success); }
+        .msg.err { background: rgba(239,68,68,.1);  border: 1px solid rgba(239,68,68,.3);  color: var(--danger);  }
+        .msg.show { display: block; }
+
+        .status-tag {
+            display: inline-block;
+            font-family: var(--mono);
+            font-size: .72rem;
+            background: rgba(56,189,248,.15);
+            color: #38bdf8;
+            border: 1px solid rgba(56,189,248,.3);
+            border-radius: 4px;
+            padding: .2rem .6rem;
+            margin-left: .5rem;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">SGS <span>/ nova solicitação</span></div>
+    <a href="/" class="btn-back">← Voltar</a>
+</header>
+
+<main>
+    <h1>Nova Solicitação <span class="status-tag">SOLICITADO</span></h1>
+    <p class="subtitle">Preencha os dados abaixo. O status inicial será <strong>SOLICITADO</strong> automaticamente.</p>
+
+    <div class="card">
+        <div id="msg" class="msg"></div>
+
+        <div class="field-row">
+            <div class="field">
+                <label>Solicitante</label>
+                <select id="solicitanteId" required>
+                    <option value="">Selecione...</option>
+                    <option th:each="s : ${solicitantes}"
+                            th:value="${s.id}"
+                            th:text="${s.nome}"></option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Categoria</label>
+                <select id="categoriaId" required>
+                    <option value="">Selecione...</option>
+                    <option th:each="c : ${categorias}"
+                            th:value="${c.id}"
+                            th:text="${c.nome}"></option>
+                </select>
+            </div>
+        </div>
+
+        <div class="field">
+            <label>Descrição</label>
+            <textarea id="descricao" placeholder="Descreva o motivo da solicitação de pagamento..." required></textarea>
+        </div>
+
+        <div class="field">
+            <label>Valor (R$)</label>
+            <input type="number" id="valor" step="0.01" min="0.01" placeholder="0,00" required/>
+            <p class="hint">Informe o valor em reais. Ex: 1500.00</p>
+        </div>
+
+        <button class="btn-submit" id="btnSubmit" onclick="cadastrar()">Cadastrar Solicitação</button>
+    </div>
+</main>
+
+<script>
+    async function cadastrar() {
+        const descricao     = document.getElementById('descricao').value.trim();
+        const solicitanteId = document.getElementById('solicitanteId').value;
+        const categoriaId   = document.getElementById('categoriaId').value;
+        const valor         = document.getElementById('valor').value;
+        const btn           = document.getElementById('btnSubmit');
+        const msg           = document.getElementById('msg');
+
+        // Validação básica no front
+        if (!descricao || !solicitanteId || !categoriaId || !valor) {
+            showMsg('Preencha todos os campos obrigatórios.', 'err');
+            return;
+        }
+        if (Number(valor) <= 0) {
+            showMsg('O valor deve ser maior que zero.', 'err');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Cadastrando...';
+
+        const params = new URLSearchParams({ descricao, solicitanteId, categoriaId, valor });
+
+        try {
+            const res = await fetch('/api/solicitacoes?' + params.toString(), { method: 'POST' });
+            const text = await res.text();
+            if (res.ok) {
+                showMsg('✓ ' + text, 'ok');
+                document.getElementById('descricao').value = '';
+                document.getElementById('valor').value = '';
+                document.getElementById('solicitanteId').value = '';
+                document.getElementById('categoriaId').value = '';
+                setTimeout(() => window.location.href = '/', 1500);
+            } else {
+                showMsg(text || 'Erro ao cadastrar solicitação.', 'err');
+            }
+        } catch (e) {
+            showMsg('Erro de conexão com o servidor.', 'err');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Cadastrar Solicitação';
+        }
+    }
+
+    function showMsg(texto, tipo) {
+        const el = document.getElementById('msg');
+        el.textContent = texto;
+        el.className = 'msg show ' + tipo;
+    }
+</script>
+</body>
+</html>

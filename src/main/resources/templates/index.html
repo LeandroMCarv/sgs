@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>SGS — Sistema de Gestão de Solicitações</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:        #0f1117;
+            --surface:   #181c27;
+            --border:    #252a38;
+            --accent:    #4f8ef7;
+            --accent-dim:#1e3560;
+            --text:      #e2e8f0;
+            --muted:     #64748b;
+            --success:   #22c55e;
+            --warning:   #f59e0b;
+            --danger:    #ef4444;
+            --info:      #38bdf8;
+            --purple:    #a78bfa;
+            --radius:    8px;
+            --mono:      'DM Mono', monospace;
+            --sans:      'DM Sans', sans-serif;
+        }
+
+        body {
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── HEADER ── */
+        header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo {
+            font-family: var(--mono);
+            font-size: .85rem;
+            letter-spacing: .08em;
+            color: var(--accent);
+        }
+        .logo span { color: var(--muted); }
+        .btn-new {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: .45rem 1.1rem;
+            border-radius: var(--radius);
+            font-family: var(--sans);
+            font-size: .82rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: opacity .15s;
+        }
+        .btn-new:hover { opacity: .85; }
+
+        /* ── MAIN ── */
+        main { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+        h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: .3rem;
+        }
+        .subtitle {
+            color: var(--muted);
+            font-size: .85rem;
+            margin-bottom: 2rem;
+        }
+
+        /* ── FILTROS ── */
+        .filters {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.2rem 1.4rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: .8rem;
+            align-items: flex-end;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: .3rem;
+        }
+        .filter-group label {
+            font-size: .72rem;
+            font-weight: 500;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+        .filter-group select,
+        .filter-group input {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-family: var(--sans);
+            font-size: .85rem;
+            padding: .42rem .75rem;
+            min-width: 150px;
+            outline: none;
+            transition: border-color .15s;
+        }
+        .filter-group select:focus,
+        .filter-group input:focus { border-color: var(--accent); }
+
+        .btn-filter {
+            background: var(--accent-dim);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: .42rem 1rem;
+            border-radius: var(--radius);
+            font-family: var(--sans);
+            font-size: .82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .15s;
+            align-self: flex-end;
+        }
+        .btn-filter:hover { background: var(--accent); color: #fff; }
+
+        .btn-clear {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--border);
+            padding: .42rem .9rem;
+            border-radius: var(--radius);
+            font-family: var(--sans);
+            font-size: .82rem;
+            cursor: pointer;
+            align-self: flex-end;
+            text-decoration: none;
+            transition: color .15s, border-color .15s;
+        }
+        .btn-clear:hover { color: var(--text); border-color: var(--muted); }
+
+        /* ── TABELA ── */
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        thead tr {
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            font-size: .72rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            color: var(--muted);
+            padding: .8rem 1rem;
+            text-align: left;
+        }
+        td {
+            padding: .85rem 1rem;
+            font-size: .85rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        tr:last-child td { border-bottom: none; }
+        tbody tr { transition: background .1s; }
+        tbody tr:hover { background: rgba(79,142,247,.05); }
+
+        .mono { font-family: var(--mono); font-size: .8rem; color: var(--muted); }
+
+        /* ── BADGE STATUS ── */
+        .badge {
+            display: inline-block;
+            font-family: var(--mono);
+            font-size: .7rem;
+            font-weight: 500;
+            padding: .25rem .6rem;
+            border-radius: 4px;
+            letter-spacing: .04em;
+        }
+        .badge-SOLICITADO  { background: rgba(56,189,248,.15); color: var(--info);    border: 1px solid rgba(56,189,248,.3); }
+        .badge-LIBERADO    { background: rgba(167,139,250,.15); color: var(--purple);  border: 1px solid rgba(167,139,250,.3); }
+        .badge-APROVADO    { background: rgba(34,197,94,.15);  color: var(--success); border: 1px solid rgba(34,197,94,.3); }
+        .badge-REJEITADO   { background: rgba(239,68,68,.15);  color: var(--danger);  border: 1px solid rgba(239,68,68,.3); }
+        .badge-CANCELADO   { background: rgba(100,116,139,.15);color: var(--muted);   border: 1px solid rgba(100,116,139,.3); }
+
+        /* ── AÇÕES ── */
+        .actions { display: flex; gap: .5rem; align-items: center; }
+        .btn-detalhe {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            padding: .28rem .65rem;
+            border-radius: 5px;
+            font-size: .75rem;
+            cursor: pointer;
+            text-decoration: none;
+            font-family: var(--sans);
+            transition: all .15s;
+        }
+        .btn-detalhe:hover { color: var(--text); border-color: var(--muted); }
+
+        .status-select {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: var(--sans);
+            font-size: .75rem;
+            padding: .28rem .5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            outline: none;
+        }
+        .btn-salvar {
+            background: var(--accent-dim);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: .28rem .65rem;
+            border-radius: 5px;
+            font-size: .75rem;
+            cursor: pointer;
+            font-family: var(--sans);
+            font-weight: 600;
+            transition: all .15s;
+        }
+        .btn-salvar:hover { background: var(--accent); color: #fff; }
+
+        /* ── EMPTY ── */
+        .empty {
+            text-align: center;
+            padding: 4rem 1rem;
+            color: var(--muted);
+            font-size: .9rem;
+        }
+        .empty-icon { font-size: 2.5rem; margin-bottom: .75rem; }
+
+        /* ── TOAST ── */
+        #toast {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: .8rem 1.2rem;
+            font-size: .85rem;
+            color: var(--text);
+            box-shadow: 0 8px 32px rgba(0,0,0,.4);
+            transform: translateY(120%);
+            transition: transform .25s ease;
+            z-index: 999;
+            max-width: 320px;
+        }
+        #toast.show { transform: translateY(0); }
+        #toast.ok   { border-left: 3px solid var(--success); }
+        #toast.err  { border-left: 3px solid var(--danger); }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">SGS <span>/ solicitações</span></div>
+    <a href="/cadastro" class="btn-new">+ Nova Solicitação</a>
+</header>
+
+<main>
+    <h1>Solicitações de Pagamento</h1>
+    <p class="subtitle">Gerencie e acompanhe todas as solicitações da organização.</p>
+
+    <!-- FILTROS -->
+    <div class="filters">
+        <div class="filter-group">
+            <label>Status</label>
+            <select id="fStatus">
+                <option value="">Todos</option>
+                <option value="SOLICITADO">Solicitado</option>
+                <option value="LIBERADO">Liberado</option>
+                <option value="APROVADO">Aprovado</option>
+                <option value="REJEITADO">Rejeitado</option>
+                <option value="CANCELADO">Cancelado</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Categoria</label>
+            <select id="fCategoria">
+                <option value="">Todas</option>
+                <option th:each="cat : ${categorias}" th:value="${cat.id}" th:text="${cat.nome}"></option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Data início</label>
+            <input type="date" id="fDataInicio"/>
+        </div>
+        <div class="filter-group">
+            <label>Data fim</label>
+            <input type="date" id="fDataFim"/>
+        </div>
+        <button class="btn-filter" onclick="buscar()">Filtrar</button>
+        <a href="/" class="btn-clear">Limpar</a>
+    </div>
+
+    <!-- TABELA -->
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Solicitante</th>
+                    <th>Documento</th>
+                    <th>Categoria</th>
+                    <th>Valor</th>
+                    <th>Data</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="tbody">
+                <tr>
+                    <td colspan="8">
+                        <div class="empty">
+                            <div class="empty-icon">⏳</div>
+                            Carregando solicitações...
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<div id="toast"></div>
+
+<script th:inline="javascript">
+    // Transições de status permitidas por estado atual
+    const TRANSICOES = {
+        SOLICITADO: ['LIBERADO', 'REJEITADO'],
+        LIBERADO:   ['APROVADO', 'REJEITADO'],
+        APROVADO:   ['CANCELADO'],
+        REJEITADO:  [],
+        CANCELADO:  []
+    };
+
+    const LABELS = {
+        SOLICITADO: 'Solicitado',
+        LIBERADO:   'Liberado',
+        APROVADO:   'Aprovado',
+        REJEITADO:  'Rejeitado',
+        CANCELADO:  'Cancelado'
+    };
+
+    function formatDate(iso) {
+        if (!iso) return '—';
+        const d = new Date(iso);
+        return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+    }
+
+    function formatValor(v) {
+        return Number(v).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+    }
+
+    function renderTabela(lista) {
+        const tbody = document.getElementById('tbody');
+        if (!lista || lista.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><div class="empty-icon">📭</div>Nenhuma solicitação encontrada.</div></td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = lista.map(s => {
+            const opcoes = TRANSICOES[s.status] || [];
+            let selectHtml = '';
+            if (opcoes.length > 0) {
+                selectHtml = `
+                    <select class="status-select" id="sel_${s.id}">
+                        ${opcoes.map(o => `<option value="${o}">${LABELS[o]}</option>`).join('')}
+                    </select>
+                    <button class="btn-salvar" onclick="atualizarStatus(${s.id})">Salvar</button>`;
+            }
+
+            return `<tr>
+                <td class="mono">#${s.id}</td>
+                <td>${s.nomeSolicitante}</td>
+                <td class="mono">${s.cpfCnpjSolicitante}</td>
+                <td>${s.nomeCategoria}</td>
+                <td>${formatValor(s.valor)}</td>
+                <td class="mono" style="font-size:.78rem">${formatDate(s.dataSolicitacao)}</td>
+                <td><span class="badge badge-${s.status}">${LABELS[s.status] || s.status}</span></td>
+                <td>
+                    <div class="actions">
+                        <a href="/solicitacoes/${s.id}" class="btn-detalhe">Ver</a>
+                        ${selectHtml}
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    async function buscar() {
+        const status     = document.getElementById('fStatus').value;
+        const categoria  = document.getElementById('fCategoria').value;
+        const dataInicio = document.getElementById('fDataInicio').value;
+        const dataFim    = document.getElementById('fDataFim').value;
+
+        const params = new URLSearchParams();
+        if (status)     params.set('status', status);
+        if (categoria)  params.set('categoriaId', categoria);
+        if (dataInicio) params.set('dataInicio', dataInicio);
+        if (dataFim)    params.set('dataFim', dataFim);
+
+        try {
+            const res = await fetch('/api/solicitacoes?' + params.toString());
+            if (!res.ok) {
+                const msg = await res.text();
+                toast(msg || 'Erro ao buscar solicitações.', 'err');
+                return;
+            }
+            const data = await res.json();
+            renderTabela(data);
+        } catch (e) {
+            toast('Erro de conexão com o servidor.', 'err');
+        }
+    }
+
+    async function atualizarStatus(id) {
+        const sel = document.getElementById('sel_' + id);
+        const novoStatus = sel ? sel.value : null;
+        if (!novoStatus) return;
+
+        try {
+            const res = await fetch(`/api/solicitacoes/${id}/status?novoStatus=${novoStatus}`, { method: 'PATCH' });
+            const msg = await res.text();
+            if (res.ok) {
+                toast(msg, 'ok');
+                buscar();
+            } else {
+                toast(msg || 'Erro ao atualizar status.', 'err');
+            }
+        } catch (e) {
+            toast('Erro de conexão com o servidor.', 'err');
+        }
+    }
+
+    function toast(msg, tipo) {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.className = 'show ' + (tipo || '');
+        setTimeout(() => el.className = '', 3000);
+    }
+
+    // Carrega ao abrir
+    buscar();
+</script>
+</body>
+</html>
