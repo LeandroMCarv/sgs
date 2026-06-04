@@ -7,6 +7,7 @@ import jakarta.persistence.Query;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,26 +15,23 @@ import java.util.Map;
 
 public class SolicitacaoRepositoryCustomImpl implements SolicitacaoRepositoryCustom {
 
-	@PersistenceContext
-	private EntityManager entityManager;
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	public List<SolicitacaoListaDTO> listarComFiltros(String status, Integer categoriaId, LocalDate dataInicio, LocalDate dataFim){
-		StringBuilder sql = new StringBuilder();
-		
-		String queryConsulta = """
-				SELECT s.id, st.nome AS nome_solicitante, st.cpf_cnpj, c.nome AS nome_categoria, s.status, s.valor, s.data_solicitacao
-				FROM solicitacao s
-				JOIN solicitante st ON s.solicitante_id = st.id
-				JOIN categoria c ON s.categoria_id = c.id
-				WHERE 1=1
-				""";
-		
-		sql.append(queryConsulta);
-		
-		Map<String, Object> parametros = new HashMap<>();
-		
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<SolicitacaoListaDTO> listarComFiltros(String status, Integer categoriaId, LocalDate dataInicio, LocalDate dataFim) {
+        StringBuilder sql = new StringBuilder("""
+                SELECT s.id, st.nome AS nome_solicitante, st.cpf_cnpj, c.nome AS nome_categoria,
+                       s.status, s.valor, s.data_solicitacao
+                FROM solicitacao s
+                JOIN solicitante st ON s.solicitante_id = st.id
+                JOIN categoria c ON s.categoria_id = c.id
+                WHERE 1=1
+                """);
+
+        Map<String, Object> parametros = new HashMap<>();
+
         if (status != null && !status.trim().isEmpty()) {
             sql.append("AND s.status = :status ");
             parametros.put("status", status);
@@ -57,25 +55,30 @@ public class SolicitacaoRepositoryCustomImpl implements SolicitacaoRepositoryCus
         sql.append("ORDER BY s.data_solicitacao DESC");
 
         Query query = entityManager.createNativeQuery(sql.toString());
-
         parametros.forEach(query::setParameter);
 
         List<Object[]> linhas = query.getResultList();
         List<SolicitacaoListaDTO> dtos = new ArrayList<>();
 
-        // Mapeamento manual de cada coluna para o DTO
-        for (Object[] coluna : linhas) {
+        for (Object[] col : linhas) {
+            LocalDateTime dataSolicitacao;
+            if (col[6] instanceof Timestamp ts) {
+                dataSolicitacao = ts.toLocalDateTime();
+            } else {
+                dataSolicitacao = (LocalDateTime) col[6];
+            }
+
             dtos.add(new SolicitacaoListaDTO(
-                ((Number) coluna[0]).intValue(),
-                (String) coluna[1],
-                (String) coluna[2],
-                (String) coluna[3],
-                (String) coluna[4],
-                (BigDecimal) coluna[5],
-                ((Timestamp) coluna[6]).toLocalDateTime()
+                    ((Number) col[0]).intValue(),
+                    (String) col[1],
+                    (String) col[2],
+                    (String) col[3],
+                    (String) col[4],
+                    (BigDecimal) col[5],
+                    dataSolicitacao
             ));
         }
 
         return dtos;
-	}
+    }
 }
