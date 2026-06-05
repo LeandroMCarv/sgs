@@ -58,7 +58,6 @@
 
         main { max-width: 720px; margin: 3rem auto; padding: 0 1.5rem; }
 
-        /* ── CABEÇALHO DA SOLICITAÇÃO ── */
         .page-header {
             display: flex;
             align-items: flex-start;
@@ -74,7 +73,6 @@
             margin-top: .25rem;
         }
 
-        /* ── BADGE STATUS ── */
         .badge {
             display: inline-flex;
             align-items: center;
@@ -100,7 +98,6 @@
         .badge-CANCELADO   { background: rgba(100,116,139,.12);color: var(--muted);   border: 1px solid rgba(100,116,139,.3); }
         .badge-CANCELADO::before   { background: var(--muted); }
 
-        /* ── CARDS ── */
         .card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -120,7 +117,6 @@
         }
         .card-body { padding: 1.4rem; }
 
-        /* ── GRID DE CAMPOS ── */
         .fields-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -159,7 +155,6 @@
             color: #94a3b8;
         }
 
-        /* ── FLUXO DE STATUS ── */
         .flow {
             display: flex;
             align-items: center;
@@ -209,7 +204,6 @@
         }
         .flow-line.done { background: var(--success); }
 
-        /* ── AÇÃO DE STATUS ── */
         .status-action {
             display: flex;
             align-items: center;
@@ -257,7 +251,6 @@
             font-style: italic;
         }
 
-        /* ── TOAST ── */
         #toast {
             position: fixed;
             bottom: 1.5rem;
@@ -295,7 +288,6 @@
         <span class="badge" th:classappend="'badge-' + ${solicitacao.status}" th:text="${solicitacao.status}"></span>
     </div>
 
-    <!-- SOLICITANTE & CATEGORIA -->
     <div class="card">
         <div class="card-title">Identificação</div>
         <div class="card-body">
@@ -321,7 +313,6 @@
         </div>
     </div>
 
-    <!-- VALOR & DESCRIÇÃO -->
     <div class="card">
         <div class="card-title">Dados do Pagamento</div>
         <div class="card-body">
@@ -339,20 +330,16 @@
         </div>
     </div>
 
-    <!-- FLUXO DE STATUS -->
     <div class="card">
         <div class="card-title">Fluxo de Status</div>
 
         <div class="flow" id="flow-container">
-            <!-- Renderizado pelo JS com base no status atual -->
         </div>
 
-        <!-- AÇÃO: atualizar status (se não for estado final) -->
         <div class="status-action" id="status-action-area"
              th:if="${solicitacao.status != 'REJEITADO' and solicitacao.status != 'CANCELADO'}">
             <label>Alterar para:</label>
             <select class="status-select" id="novoStatus">
-                <!-- Populado pelo JS -->
             </select>
             <button class="btn-atualizar"
                     th:onclick="'atualizarStatus(' + ${solicitacao.id} + ')'">
@@ -390,7 +377,7 @@
         CANCELADO:  []
     };
 
-    // ── Renderiza fluxo visual ──
+    //Renderiza fluxo visual
     function renderFluxo() {
         const container = document.getElementById('flow-container');
         if (!container) return;
@@ -418,7 +405,6 @@
                     <div class="flow-label ${isCurrent ? 'active' : ''}">${LABELS[etapa]}</div>
                 </div>`;
 
-            // linha entre etapas
             if (i < FLUXO_PRINCIPAL.length - 1) {
                 const lineClass = (i < idxAtual) ? 'done' : '';
                 html += `<div class="flow-line ${lineClass}"></div>`;
@@ -439,7 +425,6 @@
         container.innerHTML = html;
     }
 
-    // ── Popula select de transições ──
     function renderSelect() {
         const sel = document.getElementById('novoStatus');
         if (!sel) return;
@@ -447,7 +432,6 @@
         sel.innerHTML = opcoes.map(o => `<option value="${o}">${LABELS[o]}</option>`).join('');
     }
 
-    // ── Atualiza status via API ──
     async function atualizarStatus(id) {
         const sel = document.getElementById('novoStatus');
         if (!sel) return;
