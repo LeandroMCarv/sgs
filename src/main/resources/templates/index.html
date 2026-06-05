@@ -34,7 +34,6 @@
             min-height: 100vh;
         }
 
-        /* ── HEADER ── */
         header {
             background: var(--surface);
             border-bottom: 1px solid var(--border);
@@ -69,7 +68,6 @@
         }
         .btn-new:hover { opacity: .85; }
 
-        /* ── MAIN ── */
         main { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
 
         h1 {
@@ -83,7 +81,6 @@
             margin-bottom: 2rem;
         }
 
-        /* ── FILTROS ── */
         .filters {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -153,7 +150,6 @@
         }
         .btn-clear:hover { color: var(--text); border-color: var(--muted); }
 
-        /* ── TABELA ── */
         .table-wrap {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -186,7 +182,6 @@
 
         .mono { font-family: var(--mono); font-size: .8rem; color: var(--muted); }
 
-        /* ── BADGE STATUS ── */
         .badge {
             display: inline-block;
             font-family: var(--mono);
@@ -202,7 +197,6 @@
         .badge-REJEITADO   { background: rgba(239,68,68,.15);  color: var(--danger);  border: 1px solid rgba(239,68,68,.3); }
         .badge-CANCELADO   { background: rgba(100,116,139,.15);color: var(--muted);   border: 1px solid rgba(100,116,139,.3); }
 
-        /* ── AÇÕES ── */
         .actions { display: flex; gap: .5rem; align-items: center; }
         .btn-detalhe {
             background: transparent;
@@ -243,7 +237,6 @@
         }
         .btn-salvar:hover { background: var(--accent); color: #fff; }
 
-        /* ── EMPTY ── */
         .empty {
             text-align: center;
             padding: 4rem 1rem;
@@ -252,7 +245,6 @@
         }
         .empty-icon { font-size: 2.5rem; margin-bottom: .75rem; }
 
-        /* ── TOAST ── */
         #toast {
             position: fixed;
             bottom: 1.5rem;
@@ -285,7 +277,6 @@
     <h1>Solicitações de Pagamento</h1>
     <p class="subtitle">Gerencie e acompanhe todas as solicitações da organização.</p>
 
-    <!-- FILTROS -->
     <div class="filters">
         <div class="filter-group">
             <label>Status</label>
@@ -317,7 +308,6 @@
         <a href="/" class="btn-clear">Limpar</a>
     </div>
 
-    <!-- TABELA -->
     <div class="table-wrap">
         <table>
             <thead>
@@ -349,7 +339,6 @@
 <div id="toast"></div>
 
 <script th:inline="javascript">
-    // Transições de status permitidas por estado atual
     const TRANSICOES = {
         SOLICITADO: ['LIBERADO', 'REJEITADO'],
         LIBERADO:   ['APROVADO', 'REJEITADO'],
@@ -464,7 +453,6 @@
         setTimeout(() => el.className = '', 3000);
     }
 
-    // Carrega ao abrir
     buscar();
 </script>
 </body>
