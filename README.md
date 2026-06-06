@@ -1,4 +1,4 @@
-# SGS — Sistema de Gestão de Solicitações
+# SGS - Sistema de Gestão de Solicitações
 
 Aplicação web para registro, consulta e acompanhamento de solicitações de pagamento de uma organização.
 
@@ -14,10 +14,10 @@ Aplicação web para registro, consulta e acompanhamento de solicitações de pa
 | Build      | Maven (Maven Wrapper incluso)     |
 
 **Justificativas técnicas:**
-- **Spring Boot**: convenção sobre configuração, ecossistema maduro para APIs REST e integração nativa com JPA e Thymeleaf.
-- **Thymeleaf**: renderização server-side sem necessidade de framework JS separado, mantendo o projeto simples e coeso.
-- **SQL Nativo com filtros dinâmicos**: implementado em `SolicitacaoRepositoryCustomImpl`, utilizando `EntityManager` e `createNativeQuery` com `StringBuilder` e parâmetros nomeados. Garante controle total sobre o SQL gerado e atende ao requisito obrigatório do desafio.
-- **Arquitetura em camadas**: Controller → Service → Repository, utilizada para separar de maneira clara as responsabilidades.
+- **Spring Boot**: Ecossistema para APIs REST e integração com JPA e Thymeleaf.
+- **Thymeleaf**: Renderização server-side com templates.
+- **SQL Nativo com filtros dinâmicos**: Implementado em `SolicitacaoRepositoryCustomImpl`, utilizando `EntityManager` e `createNativeQuery` com `StringBuilder` e parâmetros nomeados.
+- **Arquitetura em camadas**: Controller -> Service -> Repository, utilizada para separar de maneira clara as responsabilidades.
 
 ---
 
@@ -104,7 +104,7 @@ spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
 ```
 
-> **Importante:** `ddl-auto=validate` significa que o Hibernate apenas valida o schema — as tabelas devem ser criadas manualmente pelos scripts acima antes de iniciar a aplicação.
+> **Importante:** `ddl-auto=validate` significa que o Hibernate apenas valida o schema - as tabelas devem ser criadas manualmente pelos scripts acima antes de iniciar a aplicação.
 
 ---
 
@@ -159,8 +159,9 @@ src/
         │   ├── index.html      # Listagem com filtros e atualização de status
         │   ├── cadastro.html   # Cadastro de nova solicitação
         │   └── detalhe.html    # Detalhamento completo
-        ├── schema.sql
-        ├── data.sql
+        ├── sql/
+        │   ├── schema.sql 
+        │   ├── data.sql
         └── application.properties
 ```
 
@@ -197,16 +198,16 @@ src/
 
 ---
 
-## Regras de negócio — Transições de status
+## Regras de negócio - Transições de status
 
 Toda solicitação inicia com status **SOLICITADO**. As transições permitidas são:
 
 ```
-SOLICITADO ──► LIBERADO
-SOLICITADO ──► REJEITADO
-LIBERADO   ──► APROVADO
-LIBERADO   ──► REJEITADO
-APROVADO   ──► CANCELADO
+SOLICITADO -> LIBERADO
+SOLICITADO -> REJEITADO
+LIBERADO   -> APROVADO
+LIBERADO   -> REJEITADO
+APROVADO   -> CANCELADO
 ```
 
 > **REJEITADO** e **CANCELADO** são estados finais, ou seja, nenhuma alteração é permitida a partir deles.
